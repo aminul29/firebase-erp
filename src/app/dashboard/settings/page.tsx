@@ -13,76 +13,27 @@ import { Switch } from '@/components/ui/switch';
 import { mockUser } from '@/lib/mock-data';
 import { User } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { getSettings, saveSettings } from '@/services/settings';
+import { getSettings, saveSettings, GeneralSettingsData } from '@/services/settings';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const GeneralSettings = () => {
+const GeneralSettings = ({ initialSettings }: { initialSettings: GeneralSettingsData | null }) => {
     const { toast } = useToast();
-    const [companyName, setCompanyName] = useState("");
-    const [companyEmail, setCompanyEmail] = useState("");
-    const [companyAddress, setCompanyAddress] = useState("");
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchSettings = async () => {
-            setIsLoading(true);
-            try {
-                const settings = await getSettings();
-                if (settings) {
-                    setCompanyName(settings.companyName || "WebWizFlow Inc.");
-                    setCompanyEmail(settings.companyEmail || "contact@webwizflow.com");
-                    setCompanyAddress(settings.companyAddress || "123 Innovation Drive, Tech City");
-                } else {
-                    setCompanyName("WebWizFlow Inc.");
-                    setCompanyEmail("contact@webwizflow.com");
-                    setCompanyAddress("123 Innovation Drive, Tech City");
-                }
-            } catch (error) {
-                toast({ variant: "destructive", title: "Error", description: "Could not load settings." });
-                setCompanyName("WebWizFlow Inc.");
-                setCompanyEmail("contact@webwizflow.com");
-                setCompanyAddress("123 Innovation Drive, Tech City");
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        fetchSettings();
-    }, [toast]);
+    const [companyName, setCompanyName] = useState(initialSettings?.companyName || "WebWizFlow Inc.");
+    const [companyEmail, setCompanyEmail] = useState(initialSettings?.companyEmail || "contact@webwizflow.com");
+    const [companyAddress, setCompanyAddress] = useState(initialSettings?.companyAddress || "123 Innovation Drive, Tech City");
+    const [isSaving, setIsSaving] = useState(false);
 
     const handleSave = async () => {
+        setIsSaving(true);
         try {
             await saveSettings({ companyName, companyEmail, companyAddress });
             toast({ title: "Success", description: "General settings have been saved." });
         } catch (error) {
             toast({ variant: "destructive", title: "Error", description: "Failed to save settings." });
+        } finally {
+            setIsSaving(false);
         }
     };
-
-    if(isLoading) {
-        return (
-             <Card>
-                <CardHeader>
-                    <CardTitle>General Settings</CardTitle>
-                    <CardDescription>Update your company's information.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                        <Skeleton className="h-4 w-24" />
-                        <Skeleton className="h-10 w-full" />
-                    </div>
-                     <div className="space-y-2">
-                        <Skeleton className="h-4 w-24" />
-                        <Skeleton className="h-10 w-full" />
-                    </div>
-                    <div className="space-y-2">
-                        <Skeleton className="h-4 w-24" />
-                        <Skeleton className="h-10 w-full" />
-                    </div>
-                    <Skeleton className="h-10 w-24" />
-                </CardContent>
-            </Card>
-        )
-    }
 
     return (
         <Card>
@@ -103,7 +54,7 @@ const GeneralSettings = () => {
                     <Label htmlFor="company-address">Address</Label>
                     <Input id="company-address" value={companyAddress} onChange={(e) => setCompanyAddress(e.target.value)} />
                 </div>
-                <Button onClick={handleSave}>Save Changes</Button>
+                <Button onClick={handleSave} disabled={isSaving}>{isSaving ? 'Saving...' : 'Save Changes'}</Button>
             </CardContent>
         </Card>
     )
@@ -195,6 +146,26 @@ const NotificationSettings = () => {
 
 export default function SettingsPage() {
   const [currentUser] = useState<User>(mockUser);
+  const [settings, setSettings] = useState<GeneralSettingsData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    async function fetchSettings() {
+      if (currentUser.role === 'CEO') {
+        try {
+          const fetchedSettings = await getSettings();
+          setSettings(fetchedSettings);
+        } catch (error) {
+          toast({ variant: "destructive", title: "Error", description: "Could not load settings." });
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    }
+    fetchSettings();
+  }, [currentUser.role, toast]);
+
 
   if (currentUser.role !== 'CEO') {
     return (
@@ -225,7 +196,31 @@ export default function SettingsPage() {
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
           </TabsList>
           <TabsContent value="general">
-            <GeneralSettings />
+            {isLoading ? (
+                 <Card>
+                    <CardHeader>
+                        <CardTitle>General Settings</CardTitle>
+                        <CardDescription>Update your company's information.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <Skeleton className="h-4 w-24" />
+                            <Skeleton className="h-10 w-full" />
+                        </div>
+                         <div className="space-y-2">
+                            <Skeleton className="h-4 w-24" />
+                            <Skeleton className="h-10 w-full" />
+                        </div>
+                        <div className="space-y-2">
+                            <Skeleton className="h-4 w-24" />
+                            <Skeleton className="h-10 w-full" />
+                        </div>
+                        <Skeleton className="h-10 w-24" />
+                    </CardContent>
+                </Card>
+            ) : (
+                <GeneralSettings initialSettings={settings} />
+            )}
           </TabsContent>
           <TabsContent value="financial">
             <FinancialSettings />

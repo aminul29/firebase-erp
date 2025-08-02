@@ -1,7 +1,10 @@
+
+"use server";
+
 import { db } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
-type GeneralSettingsData = {
+export type GeneralSettingsData = {
     companyName?: string;
     companyEmail?: string;
     companyAddress?: string;
@@ -27,10 +30,20 @@ export const getSettings = async (): Promise<GeneralSettingsData | null> => {
         if (docSnap.exists()) {
             return docSnap.data() as GeneralSettingsData;
         } else {
-            return null; // Or return default settings
+            // Return default values if no settings document exists
+            return {
+                companyName: "WebWizFlow Inc.",
+                companyEmail: "contact@webwizflow.com",
+                companyAddress: "123 Innovation Drive, Tech City"
+            };
         }
     } catch (error) {
         console.error("Error fetching settings: ", error);
-        throw new Error("Failed to fetch settings.");
+        // In case of error, return default values to prevent crash
+        return {
+            companyName: "WebWizFlow Inc.",
+            companyEmail: "contact@webwizflow.com",
+            companyAddress: "123 Innovation Drive, Tech City"
+        };
     }
 };
