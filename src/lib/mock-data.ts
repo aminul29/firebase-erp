@@ -1,11 +1,11 @@
 import { Client, Employee, Project, Task, User } from './types';
 
 export const mockUser: User = {
-  id: 'user-1',
-  name: 'Alex Doe',
-  email: 'alex.doe@webwizflow.com',
+  id: 'emp-6',
+  name: 'Fiona Clark',
+  email: 'fiona@example.com',
   avatarUrl: 'https://placehold.co/100x100',
-  role: 'Admin',
+  role: 'CEO',
 };
 
 export const mockEmployees: Employee[] = [
