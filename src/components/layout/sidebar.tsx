@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -6,6 +7,7 @@ import {
   Clock,
   LayoutGrid,
   LogIn,
+  Settings,
   Users,
   Workflow,
 } from "lucide-react";
@@ -13,6 +15,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { mockUser } from "@/lib/mock-data";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutGrid, label: "Dashboard" },
@@ -23,8 +26,13 @@ const navItems = [
   { href: "/dashboard/tracking", icon: Clock, label: "Time Tracking" },
 ];
 
+const ceoNavItems = [
+    { href: "/dashboard/settings", icon: Settings, label: "Settings" },
+]
+
 export function Sidebar() {
   const pathname = usePathname();
+  const user = mockUser;
 
   return (
     <aside className="hidden lg:flex flex-col w-64 border-r bg-card h-screen sticky top-0">
@@ -50,6 +58,22 @@ export function Sidebar() {
               {item.label}
             </Button>
           </Link>
+        ))}
+        {user.role === 'CEO' && ceoNavItems.map((item) => (
+            <Link key={item.href} href={item.href}>
+                <Button
+                variant="ghost"
+                className={cn(
+                    "w-full justify-start gap-2",
+                    pathname === item.href
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground"
+                )}
+                >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+                </Button>
+            </Link>
         ))}
       </nav>
       <div className="mt-auto p-4">
