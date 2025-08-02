@@ -50,11 +50,7 @@ type Columns = {
 }
 
 export function TaskBoard() {
-  const [columns, setColumns] = useState<Columns>({
-    "To Do": [],
-    "In Progress": [],
-    "Done": [],
-  });
+  const [columns, setColumns] = useState<Columns | null>(null);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -70,38 +66,25 @@ export function TaskBoard() {
   }, []);
 
   const onDragEnd = (result: DropResult) => {
+    if (!result.destination || !columns) return;
     const { source, destination } = result;
 
-    if (!destination) {
-      return;
-    }
-    
-    setColumns(prevColumns => {
-        const newColumns = { ...prevColumns };
-        const sourceColumn = newColumns[source.droppableId];
-        const destColumn = newColumns[destination.droppableId];
+    const newColumns = { ...columns };
+    const sourceColumn = newColumns[source.droppableId];
+    const destColumn = newColumns[destination.droppableId];
+    const [movedItem] = sourceColumn.splice(source.index, 1);
 
-        if (source.droppableId === destination.droppableId) {
-            const newItems = Array.from(sourceColumn);
-            const [reorderedItem] = newItems.splice(source.index, 1);
-            newItems.splice(destination.index, 0, reorderedItem);
-            newColumns[source.droppableId] = newItems;
-        } else {
-            const sourceItems = Array.from(sourceColumn);
-            const destItems = Array.from(destColumn);
-            const [movedItem] = sourceItems.splice(source.index, 1);
-            
-            movedItem.status = destination.droppableId as Task['status'];
-            destItems.splice(destination.index, 0, movedItem);
+    movedItem.status = destination.droppableId as Task['status'];
+    destColumn.splice(destination.index, 0, movedItem);
 
-            newColumns[source.droppableId] = sourceItems;
-            newColumns[destination.droppableId] = destItems;
-        }
-        return newColumns;
+    setColumns({
+        ...newColumns,
+        [source.droppableId]: sourceColumn,
+        [destination.droppableId]: destColumn,
     });
   };
   
-  if (!isClient) {
+  if (!isClient || !columns) {
     // Render a skeleton or null on the server to avoid hydration errors
     return (
         <div className="flex gap-6 overflow-x-auto pb-4">
