@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { mockEmployees, mockTasks } from "@/lib/mock-data";
 import { Task } from "@/lib/types";
 import { TaskCard } from "./task-card";
@@ -13,7 +14,7 @@ type TaskColumnProps = {
 };
 
 const TaskColumn = ({ title, tasks, columnId }: TaskColumnProps) => (
-  <Droppable droppableId={columnId}>
+  <Droppable droppableId={columnId} isDropDisabled={false}>
     {(provided) => (
       <div
         ref={provided.innerRef}
@@ -44,6 +45,11 @@ const TaskColumn = ({ title, tasks, columnId }: TaskColumnProps) => (
 
 export function TaskBoard() {
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const onDragEnd = (result: DropResult) => {
     const { source, destination, draggableId } = result;
@@ -67,6 +73,10 @@ export function TaskBoard() {
   const todoTasks = tasks.filter((task) => task.status === "To Do");
   const inProgressTasks = tasks.filter((task) => task.status === "In Progress");
   const doneTasks = tasks.filter((task) => task.status === "Done");
+
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
