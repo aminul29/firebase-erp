@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Header } from "@/components/layout/header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,18 +13,60 @@ import { Switch } from '@/components/ui/switch';
 import { mockUser } from '@/lib/mock-data';
 import { User } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import { getSettings, saveSettings } from '@/services/settings';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const GeneralSettings = () => {
     const { toast } = useToast();
-    const [companyName, setCompanyName] = useState("WebWizFlow Inc.");
-    const [companyEmail, setCompanyEmail] = useState("contact@webwizflow.com");
-    const [companyAddress, setCompanyAddress] = useState("123 Innovation Drive, Tech City");
+    const [companyName, setCompanyName] = useState("");
+    const [companyEmail, setCompanyEmail] = useState("");
+    const [companyAddress, setCompanyAddress] = useState("");
+    const [isLoading, setIsLoading] = useState(true);
 
-    const handleSave = () => {
-        // In a real app, you'd save this to a database.
-        // For now, we just show a toast.
-        toast({ title: "Success", description: "General settings have been updated for this session." });
+    useEffect(() => {
+        const fetchSettings = async () => {
+            setIsLoading(true);
+            const settings = await getSettings();
+            if (settings) {
+                setCompanyName(settings.companyName || "WebWizFlow Inc.");
+                setCompanyEmail(settings.companyEmail || "contact@webwizflow.com");
+                setCompanyAddress(settings.companyAddress || "123 Innovation Drive, Tech City");
+            }
+            setIsLoading(false);
+        };
+        fetchSettings();
+    }, []);
+
+    const handleSave = async () => {
+        await saveSettings({ companyName, companyEmail, companyAddress });
+        toast({ title: "Success", description: "General settings have been saved." });
     };
+
+    if(isLoading) {
+        return (
+             <Card>
+                <CardHeader>
+                    <CardTitle>General Settings</CardTitle>
+                    <CardDescription>Update your company's information.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-10 w-full" />
+                    </div>
+                     <div className="space-y-2">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-10 w-full" />
+                    </div>
+                    <div className="space-y-2">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-10 w-full" />
+                    </div>
+                    <Skeleton className="h-10 w-24" />
+                </CardContent>
+            </Card>
+        )
+    }
 
     return (
         <Card>
