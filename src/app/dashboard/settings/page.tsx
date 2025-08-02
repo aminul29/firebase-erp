@@ -26,20 +26,36 @@ const GeneralSettings = () => {
     useEffect(() => {
         const fetchSettings = async () => {
             setIsLoading(true);
-            const settings = await getSettings();
-            if (settings) {
-                setCompanyName(settings.companyName || "WebWizFlow Inc.");
-                setCompanyEmail(settings.companyEmail || "contact@webwizflow.com");
-                setCompanyAddress(settings.companyAddress || "123 Innovation Drive, Tech City");
+            try {
+                const settings = await getSettings();
+                if (settings) {
+                    setCompanyName(settings.companyName || "WebWizFlow Inc.");
+                    setCompanyEmail(settings.companyEmail || "contact@webwizflow.com");
+                    setCompanyAddress(settings.companyAddress || "123 Innovation Drive, Tech City");
+                } else {
+                    setCompanyName("WebWizFlow Inc.");
+                    setCompanyEmail("contact@webwizflow.com");
+                    setCompanyAddress("123 Innovation Drive, Tech City");
+                }
+            } catch (error) {
+                toast({ variant: "destructive", title: "Error", description: "Could not load settings." });
+                setCompanyName("WebWizFlow Inc.");
+                setCompanyEmail("contact@webwizflow.com");
+                setCompanyAddress("123 Innovation Drive, Tech City");
+            } finally {
+                setIsLoading(false);
             }
-            setIsLoading(false);
         };
         fetchSettings();
-    }, []);
+    }, [toast]);
 
     const handleSave = async () => {
-        await saveSettings({ companyName, companyEmail, companyAddress });
-        toast({ title: "Success", description: "General settings have been saved." });
+        try {
+            await saveSettings({ companyName, companyEmail, companyAddress });
+            toast({ title: "Success", description: "General settings have been saved." });
+        } catch (error) {
+            toast({ variant: "destructive", title: "Error", description: "Failed to save settings." });
+        }
     };
 
     if(isLoading) {
