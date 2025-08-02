@@ -47,15 +47,17 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <UserIcon />
-            <span>Profile</span>
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard/profile">
+              <UserIcon className="mr-2 h-4 w-4" />
+              <span>My Profile</span>
+            </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link href="/login">
-            <LogOut />
+            <LogOut className="mr-2 h-4 w-4" />
             <span>Log out</span>
           </Link>
         </DropdownMenuItem>

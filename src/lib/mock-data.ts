@@ -1,4 +1,4 @@
-import { Client, Employee, Project, Task, User } from './types';
+import { Client, Employee, Notification, Project, Task, User } from './types';
 
 export const mockUser: User = {
   id: 'emp-6',
@@ -7,6 +7,12 @@ export const mockUser: User = {
   avatarUrl: 'https://placehold.co/100x100',
   role: 'CEO',
 };
+
+export const mockNotifications: Notification[] = [
+  { id: 'notif-1', message: 'New task assigned: "Develop homepage UI"', read: false, link: '/dashboard/tasks' },
+  { id: 'notif-2', message: 'Project "Mobile App Redesign" has been completed', read: false, link: '/dashboard/projects' },
+  { id: 'notif-3', message: 'You have been added to the "Cloud Migration" project', read: true, link: '/dashboard/projects' },
+];
 
 export const mockEmployees: Employee[] = [
   { id: 'emp-1', name: 'Alice Johnson', email: 'alice@example.com', role: 'Teammate', avatarUrl: 'https://placehold.co/100x100', skills: ['React', 'TypeScript', 'CSS'], availability: 'Available' },

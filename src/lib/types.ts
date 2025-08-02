@@ -43,3 +43,10 @@ export type Task = {
   deadline: string;
   timeLogged: number; // in hours
 };
+
+export type Notification = {
+  id: string;
+  message: string;
+  read: boolean;
+  link: string;
+};
