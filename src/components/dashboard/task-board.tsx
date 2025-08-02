@@ -72,37 +72,29 @@ export function TaskBoard() {
       return;
     }
     
-    if (source.droppableId === destination.droppableId) {
-        // Reordering within the same column
-        const column = columns[source.droppableId];
-        const newItems = Array.from(column);
-        const [reorderedItem] = newItems.splice(source.index, 1);
-        newItems.splice(destination.index, 0, reorderedItem);
+    setColumns(prevColumns => {
+        const newColumns = { ...prevColumns };
+        const sourceColumn = newColumns[source.droppableId];
+        const destColumn = newColumns[destination.droppableId];
 
-        setColumns({
-            ...columns,
-            [source.droppableId]: newItems
-        });
+        if (source.droppableId === destination.droppableId) {
+            const newItems = Array.from(sourceColumn);
+            const [reorderedItem] = newItems.splice(source.index, 1);
+            newItems.splice(destination.index, 0, reorderedItem);
+            newColumns[source.droppableId] = newItems;
+        } else {
+            const sourceItems = Array.from(sourceColumn);
+            const destItems = Array.from(destColumn);
+            const [movedItem] = sourceItems.splice(source.index, 1);
+            
+            movedItem.status = destination.droppableId as Task['status'];
+            destItems.splice(destination.index, 0, movedItem);
 
-    } else {
-        // Moving from one column to another
-        const sourceColumn = columns[source.droppableId];
-        const destColumn = columns[destination.droppableId];
-        const sourceItems = Array.from(sourceColumn);
-        const destItems = Array.from(destColumn);
-        const [movedItem] = sourceItems.splice(source.index, 1);
-        
-        // Update status of the moved item
-        movedItem.status = destination.droppableId as Task['status'];
-
-        destItems.splice(destination.index, 0, movedItem);
-
-        setColumns({
-            ...columns,
-            [source.droppableId]: sourceItems,
-            [destination.droppableId]: destItems
-        });
-    }
+            newColumns[source.droppableId] = sourceItems;
+            newColumns[destination.droppableId] = destItems;
+        }
+        return newColumns;
+    });
   };
   
   if (!isClient) {
