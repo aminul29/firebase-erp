@@ -50,7 +50,11 @@ type Columns = {
 }
 
 export function TaskBoard() {
-  const [columns, setColumns] = useState<Columns>({});
+  const [columns, setColumns] = useState<Columns>({
+    "To Do": [],
+    "In Progress": [],
+    "Done": [],
+  });
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
