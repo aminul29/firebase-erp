@@ -75,7 +75,7 @@ export function TaskBoard() {
   const doneTasks = tasks.filter((task) => task.status === "Done");
 
   if (!isClient) {
-    return null;
+    return null; // Don't render on the server
   }
 
   return (
