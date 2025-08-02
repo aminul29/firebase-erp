@@ -1,13 +1,16 @@
 
+"use client"
+
 import { Header } from "@/components/layout/header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { mockProjects, mockTasks, mockUser } from "@/lib/mock-data";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { mockProjects, mockTasks, mockUser, mockEmployees } from "@/lib/mock-data";
 import { Project, Task } from "@/lib/types";
-import { Activity, Briefcase, CheckCircle, Clock } from "lucide-react";
+import { Activity, Briefcase, CheckCircle, Clock, ListTodo, Users, AlertCircle, FileCheck } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { differenceInDays, format, parseISO, subDays } from 'date-fns';
 
 const StatCard = ({ title, value, icon: Icon, description }: { title: string; value: string | number; icon: React.ElementType, description: string }) => (
     <Card>
@@ -22,75 +25,113 @@ const StatCard = ({ title, value, icon: Icon, description }: { title: string; va
     </Card>
 );
 
-const RecentProjects = ({ projects }: { projects: Project[] }) => {
-    const getStatusVariant = (status: Project['status']) => {
-        switch (status) {
-          case 'In Progress': return 'default';
-          case 'Planning': return 'secondary';
-          case 'On Hold': return 'destructive';
-          case 'Completed': return 'outline';
-          default: return 'outline';
+const WeeklyTimeChart = ({ tasks }: { tasks: Task[] }) => {
+    const today = new Date();
+    const last7Days = Array.from({ length: 7 }).map((_, i) => subDays(today, i)).reverse();
+
+    const data = last7Days.map(date => {
+        const dateString = format(date, 'yyyy-MM-dd');
+        const tasksOnDay = tasks.filter(task => task.deadline === dateString && task.status === 'Done');
+        const totalHours = tasksOnDay.reduce((sum, task) => sum + task.timeLogged, 0);
+        return {
+            name: format(date, 'EEE'),
+            hours: totalHours
         }
-    }
-    
+    });
+
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Recent Projects</CardTitle>
+                <CardTitle>Weekly Time Contribution (Hours)</CardTitle>
             </CardHeader>
-            <CardContent>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Project</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead className="text-right">Deadline</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {projects.slice(0, 5).map(project => (
-                             <TableRow key={project.id}>
-                                <TableCell>
-                                    <div className="font-medium">{project.name}</div>
-                                </TableCell>
-                                <TableCell>
-                                    <Badge variant={getStatusVariant(project.status)}>{project.status}</Badge>
-                                </TableCell>
-                                <TableCell className="text-right">{project.deadline}</TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+            <CardContent className="h-[250px] w-full">
+                 <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={data} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                        <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                        <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                        <Tooltip
+                            contentStyle={{
+                                background: "hsl(var(--background))",
+                                border: "1px solid hsl(var(--border))",
+                                color: "hsl(var(--foreground))"
+                            }}
+                            cursor={{ fill: 'hsl(var(--accent))' }}
+                        />
+                        <Bar dataKey="hours" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                </ResponsiveContainer>
             </CardContent>
         </Card>
     )
 }
 
-const MyTasks = ({ tasks }: { tasks: Task[] }) => {
-
-    const getStatusVariant = (status: Task['status']) => {
-        switch(status) {
-          case 'To Do': return 'secondary';
-          case 'In Progress': return 'default';
-          case 'Done': return 'outline';
-          default: return 'secondary';
-        }
-    }
+const ProjectsNearingDeadline = ({ projects }: { projects: Project[] }) => {
+    const today = new Date();
+    const nearingDeadlineProjects = projects.filter(p => {
+        const deadline = parseISO(p.deadline);
+        const daysUntilDeadline = differenceInDays(deadline, today);
+        return daysUntilDeadline >= 0 && daysUntilDeadline <= 30 && p.status !== 'Completed';
+    });
 
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Assigned to Me</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                    <AlertCircle className="h-5 w-5 text-destructive"/>
+                    Projects Nearing Deadline
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                {nearingDeadlineProjects.length > 0 ? (
+                    <div className="space-y-4">
+                        {nearingDeadlineProjects.map(project => (
+                             <div key={project.id} className="flex items-center justify-between p-2 rounded-md hover:bg-accent">
+                               <div>
+                                 <p className="font-medium">{project.name}</p>
+                                 <p className="text-sm text-muted-foreground">Due: {project.deadline}</p>
+                               </div>
+                               <Badge variant="destructive">{differenceInDays(parseISO(project.deadline), today)} days left</Badge>
+                             </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="text-muted-foreground">No projects due within 30 days.</p>
+                )}
+
+            </CardContent>
+        </Card>
+    )
+}
+
+const ActivityLog = ({ tasks, projects }: { tasks: Task[], projects: Project[] }) => {
+    const recentActivities = [
+        ...tasks.map(t => ({ type: 'Task', ...t, date: t.deadline })),
+        ...projects.map(p => ({ type: 'Project', ...p, date: p.deadline, title: p.name }))
+    ].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5);
+
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                    <Activity className="h-5 w-5 text-primary"/>
+                    Activity Log
+                </CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="space-y-4">
-                    {tasks.map(task => (
-                        <div key={task.id} className="flex items-center justify-between p-2 rounded-md hover:bg-accent">
+                    {recentActivities.map(activity => (
+                        <div key={`${activity.type}-${activity.id}`} className="flex items-start gap-3">
+                            <div className="flex-shrink-0">
+                                {activity.type === 'Task' ? <CheckCircle className="h-5 w-5 text-green-500 mt-1" /> : <Briefcase className="h-5 w-5 text-blue-500 mt-1" />}
+                            </div>
                            <div>
-                             <p className="font-medium">{task.title}</p>
-                             <p className="text-sm text-muted-foreground">Due: {task.deadline}</p>
+                             <p className="font-medium">{activity.title}</p>
+                             <p className="text-sm text-muted-foreground">
+                                {activity.type === 'Task' ? `Task completed` : `Project status: ${activity.status}`} - {format(parseISO(activity.date), 'PP')}
+                             </p>
                            </div>
-                           <Badge variant={getStatusVariant(task.status)}>{task.status}</Badge>
                         </div>
                     ))}
                 </div>
@@ -99,58 +140,94 @@ const MyTasks = ({ tasks }: { tasks: Task[] }) => {
     )
 }
 
+const RecentCompletions = ({ tasks }: { tasks: Task[] }) => {
+    const completedTasks = tasks.filter(t => t.status === 'Done').slice(0,5);
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                    <FileCheck className="h-5 w-5 text-secondary"/>
+                    Recent Completions
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="space-y-4">
+                    {completedTasks.length > 0 ? completedTasks.map(task => (
+                        <div key={task.id} className="flex items-center justify-between p-2 rounded-md hover:bg-accent">
+                           <div>
+                             <p className="font-medium">{task.title}</p>
+                             <p className="text-sm text-muted-foreground">Completed: {task.deadline}</p>
+                           </div>
+                           <Badge variant="outline">Done</Badge>
+                        </div>
+                    )) : (
+                        <p className="text-muted-foreground">No recent completions.</p>
+                    )}
+                </div>
+            </CardContent>
+        </Card>
+    )
+}
+
+
 export default function DashboardPage() {
     const user = mockUser;
     const projects = mockProjects;
     const tasks = mockTasks;
+    const employees = mockEmployees;
 
-    const activeProjects = projects.filter(p => p.status === 'In Progress').length;
+    const ongoingProjects = projects.filter(p => p.status === 'In Progress').length;
     const pendingTasks = tasks.filter(t => t.status === 'To Do' || t.status === 'In Progress').length;
-    const totalHoursTracked = tasks.reduce((acc, task) => acc + task.timeLogged, 0);
-    const completedTasks = tasks.filter(t => t.status === 'Done').length;
-    const myTasks = tasks.filter(t => t.assigneeId === user.id && t.status !== 'Done');
+    const teamSize = employees.length;
+    const myOpenTasks = tasks.filter(t => t.assigneeId === user.id && t.status !== 'Done').length;
 
   return (
     <div className="flex-1 space-y-4">
         <Header title="Dashboard" />
         <div className="p-4 md:p-8 pt-6 space-y-6">
-            <div className="flex items-center justify-between">
-                <h2 className="text-3xl font-bold tracking-tight font-headline">Welcome back, {user.name.split(' ')[0]}!</h2>
-            </div>
-
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <StatCard 
-                    title="Active Projects" 
-                    value={activeProjects} 
+                <StatCard
+                    title="Total Projects"
+                    value={projects.length}
                     icon={Briefcase}
-                    description="Projects currently in progress"
+                    description={`${ongoingProjects} Ongoing`}
                 />
-                <StatCard 
-                    title="Pending Tasks" 
-                    value={pendingTasks} 
-                    icon={Activity}
-                    description="Tasks that are not yet completed"
+                <StatCard
+                    title="Total Tasks"
+                    value={tasks.length}
+                    icon={ListTodo}
+                    description={`${pendingTasks} Pending`}
                 />
-                <StatCard 
-                    title="Hours Tracked" 
-                    value={`${totalHoursTracked}h`} 
-                    icon={Clock}
-                    description="Total hours logged on all tasks"
+                <StatCard
+                    title="Team Size"
+                    value={teamSize}
+                    icon={Users}
+                    description="Active Members"
                 />
-                <StatCard 
-                    title="Completed Tasks" 
-                    value={completedTasks} 
+                <StatCard
+                    title="My Open Tasks"
+                    value={myOpenTasks}
                     icon={CheckCircle}
-                    description="Tasks marked as done this month"
+                    description="Assigned to you"
                 />
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-                <div className="lg:col-span-4">
-                    <RecentProjects projects={projects} />
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div className="lg:col-span-2">
+                     <WeeklyTimeChart tasks={tasks} />
                 </div>
-                <div className="lg:col-span-3">
-                    <MyTasks tasks={myTasks} />
+                <div>
+                    <ProjectsNearingDeadline projects={projects} />
+                </div>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+                <div>
+                    <ActivityLog tasks={tasks} projects={projects} />
+                </div>
+                <div>
+                    <RecentCompletions tasks={tasks} />
                 </div>
             </div>
 
