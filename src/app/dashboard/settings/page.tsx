@@ -12,8 +12,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { mockUser } from '@/lib/mock-data';
 import { User } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
 
 const GeneralSettings = () => {
+    const { toast } = useToast();
     return (
         <Card>
             <CardHeader>
@@ -33,13 +35,14 @@ const GeneralSettings = () => {
                     <Label htmlFor="company-address">Address</Label>
                     <Input id="company-address" defaultValue="123 Innovation Drive, Tech City" />
                 </div>
-                <Button>Save Changes</Button>
+                <Button onClick={() => toast({ title: "Success", description: "General settings have been updated." })}>Save Changes</Button>
             </CardContent>
         </Card>
     )
 }
 
 const FinancialSettings = () => {
+    const { toast } = useToast();
     return (
         <Card>
             <CardHeader>
@@ -74,13 +77,14 @@ const FinancialSettings = () => {
                         </SelectContent>
                     </Select>
                  </div>
-                 <Button>Save Changes</Button>
+                 <Button onClick={() => toast({ title: "Success", description: "Financial settings have been updated." })}>Save Changes</Button>
             </CardContent>
         </Card>
     )
 }
 
 const NotificationSettings = () => {
+    const { toast } = useToast();
     return (
         <Card>
             <CardHeader>
@@ -115,7 +119,7 @@ const NotificationSettings = () => {
                     </div>
                     <Switch />
                 </div>
-                <Button>Save Changes</Button>
+                <Button onClick={() => toast({ title: "Success", description: "Notification settings have been updated." })}>Save Changes</Button>
             </CardContent>
         </Card>
     )
