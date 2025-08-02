@@ -3,13 +3,14 @@ export type User = {
   name: string;
   email: string;
   avatarUrl: string;
+  role: 'CEO' | 'Admin' | 'HR' | 'Teammate';
 };
 
 export type Employee = {
   id: string;
   name: string;
   email: string;
-  role: string;
+  role: 'CEO' | 'Admin' | 'HR' | 'Teammate';
   avatarUrl: string;
   skills: string[];
   availability: 'Available' | 'Busy' | 'On Leave';

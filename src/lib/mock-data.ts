@@ -5,15 +5,16 @@ export const mockUser: User = {
   name: 'Alex Doe',
   email: 'alex.doe@webwizflow.com',
   avatarUrl: 'https://placehold.co/100x100',
+  role: 'Admin',
 };
 
 export const mockEmployees: Employee[] = [
-  { id: 'emp-1', name: 'Alice Johnson', email: 'alice@example.com', role: 'Frontend Developer', avatarUrl: 'https://placehold.co/100x100', skills: ['React', 'TypeScript', 'CSS'], availability: 'Available' },
-  { id: 'emp-2', name: 'Bob Williams', email: 'bob@example.com', role: 'Backend Developer', avatarUrl: 'https://placehold.co/100x100', skills: ['Node.js', 'Python', 'Databases'], availability: 'Busy' },
-  { id: 'emp-3', name: 'Charlie Brown', email: 'charlie@example.com', role: 'UI/UX Designer', avatarUrl: 'https://placehold.co/100x100', skills: ['Figma', 'User Research', 'Prototyping'], availability: 'Available' },
-  { id: 'emp-4', name: 'Diana Miller', email: 'diana@example.com', role: 'Project Manager', avatarUrl: 'https://placehold.co/100x100', skills: ['Agile', 'Scrum', 'JIRA'], availability: 'Available' },
-  { id: 'emp-5', name: 'Ethan Garcia', email: 'ethan@example.com', role: 'DevOps Engineer', avatarUrl: 'https://placehold.co/100x100', skills: ['Docker', 'Kubernetes', 'CI/CD'], availability: 'On Leave' },
-  { id: 'emp-6', name: 'Fiona Clark', email: 'fiona@example.com', role: 'QA Tester', avatarUrl: 'https://placehold.co/100x100', skills: ['Automated Testing', 'Selenium', 'Manual Testing'], availability: 'Busy' },
+  { id: 'emp-1', name: 'Alice Johnson', email: 'alice@example.com', role: 'Teammate', avatarUrl: 'https://placehold.co/100x100', skills: ['React', 'TypeScript', 'CSS'], availability: 'Available' },
+  { id: 'emp-2', name: 'Bob Williams', email: 'bob@example.com', role: 'Teammate', avatarUrl: 'https://placehold.co/100x100', skills: ['Node.js', 'Python', 'Databases'], availability: 'Busy' },
+  { id: 'emp-3', name: 'Charlie Brown', email: 'charlie@example.com', role: 'Teammate', avatarUrl: 'https://placehold.co/100x100', skills: ['Figma', 'User Research', 'Prototyping'], availability: 'Available' },
+  { id: 'emp-4', name: 'Diana Miller', email: 'diana@example.com', role: 'Admin', avatarUrl: 'https://placehold.co/100x100', skills: ['Agile', 'Scrum', 'JIRA'], availability: 'Available' },
+  { id: 'emp-5', name: 'Ethan Garcia', email: 'ethan@example.com', role: 'HR', avatarUrl: 'https://placehold.co/100x100', skills: ['Docker', 'Kubernetes', 'CI/CD'], availability: 'On Leave' },
+  { id: 'emp-6', name: 'Fiona Clark', email: 'fiona@example.com', role: 'CEO', avatarUrl: 'https://placehold.co/100x100', skills: ['Automated Testing', 'Selenium', 'Manual Testing'], availability: 'Busy' },
 ];
 
 export const mockClients: Client[] = [
