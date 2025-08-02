@@ -29,19 +29,20 @@ type Columns = {
     [key: string]: Task[]
 }
 
-export function TaskBoard() {
+export function TaskBoard({ tasks, setTasks }: { tasks: Task[], setTasks: React.Dispatch<React.SetStateAction<Task[]>> }) {
   const [columns, setColumns] = useState<Columns | null>(null);
 
   useEffect(() => {
-    const todoTasks = mockTasks.filter((task) => task.status === "To Do");
-    const inProgressTasks = mockTasks.filter((task) => task.status === "In Progress");
-    const doneTasks = mockTasks.filter((task) => task.status === "Done");
+    const todoTasks = tasks.filter((task) => task.status === "To Do");
+    const inProgressTasks = tasks.filter((task) => task.status === "In Progress");
+    const doneTasks = tasks.filter((task) => task.status === "Done");
     setColumns({
         "To Do": todoTasks,
         "In Progress": inProgressTasks,
         "Done": doneTasks
     });
-  }, []);
+  }, [tasks]);
+
 
   if (!columns) {
     return (
@@ -61,8 +62,8 @@ export function TaskBoard() {
 
   return (
     <div className="flex gap-6 overflow-x-auto pb-4">
-        {Object.entries(columns).map(([columnId, tasks]) => (
-             <TaskColumn key={columnId} title={columnId} tasks={tasks} />
+        {Object.entries(columns).map(([columnId, columnTasks]) => (
+             <TaskColumn key={columnId} title={columnId} tasks={columnTasks} />
         ))}
     </div>
   );
