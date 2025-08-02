@@ -18,6 +18,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  webpack(config, {isServer}) {
+    if (isServer) {
+      config.watchOptions = {
+        ...config.watchOptions,
+        ignored: ['**/src/ai/**'],
+      };
+    }
+    return config;
+  },
 };
 
 export default nextConfig;
