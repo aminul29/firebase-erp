@@ -16,6 +16,16 @@ import { useToast } from '@/hooks/use-toast';
 
 const GeneralSettings = () => {
     const { toast } = useToast();
+    const [companyName, setCompanyName] = useState("WebWizFlow Inc.");
+    const [companyEmail, setCompanyEmail] = useState("contact@webwizflow.com");
+    const [companyAddress, setCompanyAddress] = useState("123 Innovation Drive, Tech City");
+
+    const handleSave = () => {
+        // In a real app, you'd save this to a database.
+        // For now, we just show a toast.
+        toast({ title: "Success", description: "General settings have been updated for this session." });
+    };
+
     return (
         <Card>
             <CardHeader>
@@ -25,17 +35,17 @@ const GeneralSettings = () => {
             <CardContent className="space-y-4">
                 <div className="space-y-2">
                     <Label htmlFor="company-name">Company Name</Label>
-                    <Input id="company-name" defaultValue="WebWizFlow Inc." />
+                    <Input id="company-name" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="company-email">Company Email</Label>
-                    <Input id="company-email" type="email" defaultValue="contact@webwizflow.com" />
+                    <Input id="company-email" type="email" value={companyEmail} onChange={(e) => setCompanyEmail(e.target.value)} />
                 </div>
                  <div className="space-y-2">
                     <Label htmlFor="company-address">Address</Label>
-                    <Input id="company-address" defaultValue="123 Innovation Drive, Tech City" />
+                    <Input id="company-address" value={companyAddress} onChange={(e) => setCompanyAddress(e.target.value)} />
                 </div>
-                <Button onClick={() => toast({ title: "Success", description: "General settings have been updated." })}>Save Changes</Button>
+                <Button onClick={handleSave}>Save Changes</Button>
             </CardContent>
         </Card>
     )
